@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var theme = null;
+      var accent = null;
+      try {
+        theme = localStorage.getItem('cms-theme');
+        accent = localStorage.getItem('cms-accent');
+      } catch (e) { /* localStorage недоступен: работаем по системной теме */ }
+      if (theme !== 'light' && theme !== 'dark' && theme !== 'contrast') {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      root.setAttribute('data-theme', theme);
+      if (/^#[0-9a-f]{6}$/i.test(accent || '')) {
+        var r = parseInt(accent.slice(1, 3), 16), g = parseInt(accent.slice(3, 5), 16), b = parseInt(accent.slice(5, 7), 16);
+        var lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        root.style.setProperty('--accent-rgb', r + ', ' + g + ', ' + b);
+        root.style.setProperty('--accent-contrast', lum > 0.55 ? '#111827' : '#ffffff');
+      }
+    })();
+  </script>
+  <title>Код&Контент — панель управления CMS</title>
+  <meta name="description" content="Панель управления контентом: статьи, категории, авторы, модерация и публикации.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="site-header">
+    <button id="burger" class="burger" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Открыть меню">
+      <span class="burger__bar"></span>
+      <span class="burger__bar"></span>
+      <span class="burger__bar"></span>
+    </button>
+    <p class="logo">Код<span>&amp;</span>Контент</p>
+    <p class="site-header__title">Панель управления контентом</p>
+    <section class="site-header__tools" aria-label="Оформление">
+      <p class="tool">
+        <label class="visually-hidden" for="theme-select">Тема оформления</label>
+        <span class="select select--compact">
+          <select id="theme-select" name="theme">
+            <option value="auto">Авто</option>
+            <option value="light">Светлая</option>
+            <option value="dark">Тёмная</option>
+            <option value="contrast">Контраст</option>
+          </select>
+        </span>
+      </p>
+      <p class="tool">
+        <label class="swatch" for="accent-color" title="Акцентный цвет">
+          <span class="visually-hidden">Акцентный цвет</span>
+          <input id="accent-color" type="color" value="#3b5bdb">
+        </label>
+        <button class="icon-btn accent-reset" type="button" data-accent-reset hidden aria-label="Сбросить акцентный цвет" title="Сбросить акцентный цвет">↺</button>
+      </p>
+    </section>
+    <p class="site-header__date">
+      Сегодня: <time id="today" datetime="2026-10-21">21 октября 2026</time>
+    </p>
+  </header>
+
+  <nav id="sidebar" class="sidebar" aria-label="Основная навигация">
+    <h2 class="sidebar__title">Разделы</h2>
+    <ul>
+      <li><a href="#overview">Обзор</a></li>
+      <li><a href="#articles">Статьи</a></li>
+      <li><a href="#categories">Категории</a></li>
+      <li><a href="#authors">Авторы</a></li>
+    </ul>
+    <p class="sidebar__tools">
+      <button class="btn btn--secondary" type="button" data-accent-reset hidden>Сбросить акцентный цвет</button>
+    </p>
+  </nav>
+  <button id="nav-overlay" class="nav-overlay" type="button" tabindex="-1" aria-label="Закрыть меню" hidden></button>
+
+  <main id="main" class="content">
+    <section id="overview" aria-labelledby="overview-title">
+      <h1 id="overview-title">Обзор редакции</h1>
+      <section id="stats" aria-label="Сводные показатели"></section>
+    </section>
+
+    <form id="filters" class="filters" aria-labelledby="filters-title" autocomplete="off">
+      <h2 id="filters-title" class="filters__title">Фильтры</h2>
+      <section class="filters__row">
+        <p class="field field--search">
+          <label for="f-search">Поиск</label>
+          <input id="f-search" name="query" type="search" placeholder="Заголовок, автор или тег">
+        </p>
+
+        <p class="field">
+          <label for="f-category">Категория</label>
+          <span class="select">
+            <select id="f-category" name="category">
+              <option value="">Все категории</option>
+            </select>
+          </span>
+        </p>
+
+        <p class="field">
+          <label for="f-priority">Приоритет</label>
+          <span class="select">
+            <select id="f-priority" name="priority">
+              <option value="">Любой приоритет</option>
+            </select>
+          </span>
+        </p>
+
+        <p class="field">
+          <label for="f-sort">Сортировка</label>
+          <span class="select">
+            <select id="f-sort" name="sort"></select>
+          </span>
+        </p>
+      </section>
+
+      <section class="filters__row">
+        <fieldset class="choice">
+          <legend>Статус</legend>
+          <ul class="choice__list">
+            <li><input class="choice__input" type="checkbox" id="s-published" name="status" value="published" checked><label for="s-published">Опубликована</label></li>
+            <li><input class="choice__input" type="checkbox" id="s-review" name="status" value="review" checked><label for="s-review">На проверке</label></li>
+            <li><input class="choice__input" type="checkbox" id="s-draft" name="status" value="draft" checked><label for="s-draft">Черновик</label></li>
+            <li><input class="choice__input" type="checkbox" id="s-rejected" name="status" value="rejected" checked><label for="s-rejected">Отклонена</label></li>
+            <li><input class="choice__input" type="checkbox" id="s-archived" name="status" value="archived" checked><label for="s-archived">В архиве</label></li>
+          </ul>
+        </fieldset>
+
+        <fieldset class="choice choice--radio">
+          <legend>Вид</legend>
+          <ul class="choice__list">
+            <li><input class="choice__input" type="radio" id="v-table" name="view" value="table" checked><label for="v-table">Таблица</label></li>
+            <li><input class="choice__input" type="radio" id="v-cards" name="view" value="cards"><label for="v-cards">Карточки</label></li>
+          </ul>
+        </fieldset>
+
+        <p class="filters__actions">
+          <button id="f-reset" class="btn btn--secondary" type="reset" disabled>Сбросить фильтры</button>
+        </p>
+      </section>
+    </form>
+
+    <section id="articles" aria-labelledby="articles-title">
+      <h2 id="articles-title">Статьи</h2>
+
+      <p id="results-count" class="muted" role="status" aria-live="polite"></p>
+      <section id="results" class="table-wrap" aria-label="Список статей"></section>
+    </section>
+
+    <section id="workspace" aria-labelledby="workspace-title">
+      <h2 id="workspace-title">Справочники</h2>
+      <div class="tabs" data-tabs>
+        <div class="tabs__list" role="tablist" aria-label="Справочники редакции">
+          <button id="tab-categories" class="tabs__tab" type="button" role="tab" aria-selected="true" aria-controls="panel-categories" tabindex="0">Категории</button>
+          <button id="tab-authors" class="tabs__tab" type="button" role="tab" aria-selected="false" aria-controls="panel-authors" tabindex="-1">Авторы</button>
+        </div>
+        <section id="panel-categories" class="tabs__panel" role="tabpanel" aria-labelledby="tab-categories" tabindex="0">
+          <h3 class="visually-hidden">Категории</h3>
+          <section id="categories-list" aria-label="Дерево категорий"></section>
+        </section>
+        <section id="panel-authors" class="tabs__panel" role="tabpanel" aria-labelledby="tab-authors" tabindex="0" hidden>
+          <h3 class="visually-hidden">Авторы</h3>
+          <section id="authors-list" aria-label="Команда авторов"></section>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel" aria-labelledby="moderation-title">
+    <h2 id="moderation-title">На модерации</h2>
+    <p class="muted">Комментарии, ожидающие решения.</p>
+    <section id="moderation-list" aria-label="Очередь модерации"></section>
+  </aside>
+
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <footer class="site-footer">
+    <p>© <time datetime="2026">2026</time> Код&amp;Контент. Учебный проект CMS.</p>
+    <address>
+      Редакция: <a href="mailto:redaktsiya@kodcontent.ru">redaktsiya@kodcontent.ru</a>
+    </address>
+  </footer>
+</body>
+</html>
