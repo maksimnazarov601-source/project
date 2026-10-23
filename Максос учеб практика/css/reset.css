@@ -1,0 +1,30 @@
+/* Современный CSS Reset (без универсального сброса margin/padding через звёздочку) */
+html, body, header, nav, main, section, article, aside, footer, figure, figcaption,
+div, p, span, a, ul, ol, li, dl, dt, dd, table, caption, thead, tbody, tr, th, td,
+img, blockquote, address, time, input, button, textarea, select,
+h1, h2, h3, h4, h5, h6,
+header::before, header::after, section::before, section::after, article::before, article::after {
+  box-sizing: border-box;
+}
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body, h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, ul, ol, address, pre {
+  margin: 0;
+}
+ul[role='list'], ol[role='list'] { list-style: none; }
+body { min-height: 100vh; line-height: 1.5; text-rendering: optimizeSpeed; }
+h1, h2, h3, h4, button, input, label { line-height: 1.1; }
+img, picture, svg, video { display: block; max-width: 100%; height: auto; }
+input, button, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a:not([class]) { text-decoration-skip-ink: auto; }
+address { font-style: normal; }
+table { border-collapse: collapse; border-spacing: 0; }
+th { text-align: left; }
+ul, ol { padding: 0; }
+li { list-style: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
